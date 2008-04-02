@@ -1,0 +1,4 @@
+<a href="<%$RT::WebPath%>/Search/Results.xls<%$QueryString%>">XLS</a>
+<%ARGS>
+$QueryString => undef
+</%ARGS>

@@ -1,0 +1,12 @@
+abstract: Add Excel format export to RT search results
+author: 'Emmanuel Lacour <elacour@home-dn.net>'
+distribution_type: module
+generated_by: Module::Install version 0.64
+license: perl
+name: RT-Extension-SearchResults-XLS
+no_index:
+  directory:
+    - html
+    - inc
+    - t
+version: 0.01
