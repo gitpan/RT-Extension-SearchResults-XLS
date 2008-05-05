@@ -1,7 +1,7 @@
 abstract: Add Excel format export to RT search results
 author: 'Emmanuel Lacour <elacour@home-dn.net>'
 distribution_type: module
-generated_by: Module::Install version 0.64
+generated_by: Module::Install version 0.71
 license: perl
 name: RT-Extension-SearchResults-XLS
 no_index:
@@ -9,4 +9,4 @@ no_index:
     - html
     - inc
     - t
-version: 0.01
+version: 0.02

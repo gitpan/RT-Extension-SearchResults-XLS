@@ -1,5 +1,8 @@
 Revision history for RT-Extension-SearchResults-XLS
 
+0.02    Mon,  5 May 2008 16:02:08 +0200
+        Upgrade inc/* (Module::Install, Module::Install::RTx)
+
 0.01    Wed,  2 Apr 2008 13:59:36 +0200
         Initial release.
 
