@@ -13,6 +13,11 @@ To install this module, run the following commands:
 	make test
 	make install
 
+Then, to make it active, add it to @Plugins in RT site configuration file
+(RT_SiteConfig.pm), example:
+
+    Set(@Plugins,(qw(RT::Extension::SearchResults::XLS)));
+
 SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the
