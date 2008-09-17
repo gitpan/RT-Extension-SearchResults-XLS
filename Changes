@@ -1,5 +1,8 @@
 Revision history for RT-Extension-SearchResults-XLS
 
+0.04    Wed, 17 Sep 2008 11:47:48 +0200
+        Use a new callback that will be included in RT > 3.8.1
+
 0.03    Tue, 16 Sep 2008 16:08:34 +0200
         Upgrade inc/* (Module::Install, Module::Install::RTx)
         Update Results.xls file to get improvement of Results.tsv file made in

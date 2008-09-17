@@ -1,5 +1,6 @@
 Changes
 html/Callbacks/Results-XLS/Search/Results.html/SearchActions
+html/Callbacks/Results-XLS/Search/Elements/ResultViews/AfterTools
 html/Search/Results.xls
 inc/Module/Install.pm
 inc/Module/Install/RTx.pm

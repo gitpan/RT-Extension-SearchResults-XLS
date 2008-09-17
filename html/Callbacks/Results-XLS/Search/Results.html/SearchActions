@@ -1,4 +1,8 @@
+% # Don't display this callback if our RT Version contains the new ResultsView
+% # AfterTools Callback
+% if (RT::Handle::cmp_version( '3.8.1', $RT::VERSION ) > 0 ) {
 <a href="<%$RT::WebPath%>/Search/Results.xls<%$QueryString%>">XLS</a>
+% }
 <%ARGS>
 $QueryString => undef
 </%ARGS>
