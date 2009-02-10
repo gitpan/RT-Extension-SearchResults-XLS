@@ -133,7 +133,6 @@ foreach my $row (@rows) {
     }
     foreach my $id (sort keys %known_cfs) {
         my $val = $row->{'CustomField-'.$id};
-        $val =~ s/(\n|\r)//g;
         $worksheet->write($ws_row, $ws_col, $val);
         $ws_col++;
     }
