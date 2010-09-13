@@ -9,4 +9,4 @@ no_index:
     - html
     - inc
     - t
-version: 0.05
+version: 0.06

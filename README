@@ -16,7 +16,7 @@ To install this module, run the following commands:
 Then, to make it active, add it to @Plugins in RT site configuration file
 (RT_SiteConfig.pm), example:
 
-    Set(@Plugins,(qw(RT::Extension::SearchResults::XLS)));
+    Set(@Plugins, qw(RT::Extension::SearchResults::XLS) );
 
 SUPPORT AND DOCUMENTATION
 
@@ -42,7 +42,7 @@ You can also look for information at:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2008 Emmanuel Lacour
+Copyright (C) 2008-2010 Emmanuel Lacour
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

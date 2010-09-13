@@ -9,11 +9,11 @@ RT::Extension::SearchResults::XLS - Add Excel format export to RT search results
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 
 =head1 SYNOPSIS
@@ -70,7 +70,7 @@ L<http://search.cpan.org/dist/RT-Extension-SearchResults-XLS>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2008 Emmanuel Lacour, all rights reserved.
+Copyright 2008-2010 Emmanuel Lacour, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

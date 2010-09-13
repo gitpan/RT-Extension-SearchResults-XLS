@@ -2,7 +2,7 @@
 %# 
 %# COPYRIGHT:
 %# 
-%# This software is Copyright (c) 1996-2008 Best Practical Solutions, LLC
+%# This software is Copyright (c) 1996-2009 Best Practical Solutions, LLC
 %#                                          <jesse@bestpractical.com>
 %# 
 %# (Except where explicitly superseded by other copyright notices)
@@ -46,6 +46,7 @@
 %# 
 %# END BPS TAGGED BLOCK }}}
 <%ARGS>
+$Query => ''
 $OrderBy => 'id'
 $Order => 'ASC'
 </%ARGS>
@@ -59,84 +60,109 @@ my $workbook = Spreadsheet::WriteExcel->new($fh) or die $!;
 my $worksheet = $workbook->add_worksheet();
 
 my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
-$Tickets->FromSQL( $ARGS{'Query'} );
+$Tickets->FromSQL( $Query );
 if ( $OrderBy =~ /\|/ ) {
-
-  # Multiple Sorts
-  my @OrderBy = split /\|/, $OrderBy;
-  my @Order   = split /\|/, $Order;
-  $Tickets->OrderByCols(
-    map { { FIELD => $OrderBy[$_], ORDER => $Order[$_] } }
-      ( 0 .. $#OrderBy ) );
+    # Multiple Sorts
+    my @OrderBy = split /\|/, $OrderBy;
+    my @Order   = split /\|/, $Order;
+    $Tickets->OrderByCols(
+        map { { FIELD => $OrderBy[$_], ORDER => $Order[$_] } }
+        ( 0 .. $#OrderBy )
+    );
 }
 else {
-  $Tickets->OrderBy( FIELD => $OrderBy, ORDER => $Order );
+    $Tickets->OrderBy( FIELD => $OrderBy, ORDER => $Order );
 }
 
-my @rows;
-my %known_cfs;
+my %cf_id_to_name;
+my %cf_name_to_pos;
+{
+    my $cfs = RT::SQL::PossibleCustomFields(
+        Query => $Query, CurrentUser => $session{'CurrentUser'},
+    );
+    while ( my $cf = $cfs->Next ) {
+        my $name = $cf->Name;
+        $cf_id_to_name{ $cf->id } = $name;
+        next if $cf_name_to_pos{ $name };
 
-my @attrs = qw( id QueueObj->Name Subject Status TimeEstimated TimeWorked TimeLeft Priority FinalPriority OwnerObj->Name 
-                Requestors->MemberEmailAddressesAsString Cc->MemberEmailAddressesAsString AdminCc->MemberEmailAddressesAsString
-                DueObj->ISO ToldObj->ISO CreatedObj->ISO ResolvedObj->ISO LastUpdatedObj->ISO);
+        $cf_name_to_pos{ $name } = 
+            (sort { $b <=> $a } values %cf_name_to_pos)[0] + 1;
+    }
+}
+
+my @attrs = qw(
+    id QueueObj->Name Subject Status
+    TimeEstimated TimeWorked TimeLeft
+    Priority FinalPriority
+    OwnerObj->Name 
+    Requestors->MemberEmailAddressesAsString
+    Cc->MemberEmailAddressesAsString
+    AdminCc->MemberEmailAddressesAsString
+    DueObj->ISO ToldObj->ISO CreatedObj->ISO
+    ResolvedObj->ISO LastUpdatedObj->ISO
+);
 
 $r->content_type('application/vnd.ms-excel');
-while ( my $Ticket = $Tickets->Next()) {
-    my $row;
-    foreach my $attr (@attrs) {
-        if ($attr =~ /(.*)->ISO$/ and $Ticket->$1->Unix <= 0) {
-            $row->{$attr} = "";
-        } else {
-            my $method = '$Ticket->'.$attr.'()';
-            $method =~ s/->ISO\(\)$/->ISO( Timezone => 'user' )/;
-            $row->{$attr} = eval $method;
-            if ($@) {die "Failed to find $attr - ". $@}; 
-        }
-    }
-
-    my $cfs = $Ticket->QueueObj->TicketCustomFields();
-    while (my $cf = $cfs->Next) {
-        $known_cfs{$cf->Id} = $cf->Name;
-        my @content;
-        my $values = $Ticket->CustomFieldValues($cf->Id);
-        while (my $value = $values->Next) {
-            push @content, $value->Content;
-        }
-        $row->{'CustomField-'.$cf->Id} = join(', ',@content);
-    }
-    push @rows, $row;
-}
-
-{ 
+{
     my @header;
-    my $ws_col = 0;
     foreach my $attr (@attrs) {
         my $label = $attr;
         $label =~ s'Obj-.(?:AsString|Name|ISO)''g;
         $label =~ s'-\>MemberEmailAddressesAsString''g;
-        $worksheet->write(0, $ws_col, $label);
-        $ws_col++;
+        push @header, $label;
     }
-    foreach my $id (sort keys %known_cfs) {
-        $worksheet->write(0, $ws_col, "CF-".$known_cfs{$id});
+
+    $_ += @header - 1 foreach values %cf_name_to_pos;
+
+    foreach my $name ( sort { $cf_name_to_pos{$a} <=> $cf_name_to_pos{$b} } keys %cf_name_to_pos ) {
+        push @header, "CF-". $name;
+    }
+    my $ws_col = 0;
+    foreach my $ws_val ( @header ) {
+        $worksheet->write(0, $ws_col, $ws_val);
         $ws_col++;
     }
 }
 
+my $i = 0;
 my $ws_row = 1;
-foreach my $row (@rows) {
-    my $ws_col = 0;
+while ( my $Ticket = $Tickets->Next()) {
     my @row;
-    foreach my $attr(@attrs) {
-        $worksheet->write($ws_row, $ws_col, $row->{"$attr"});
-        $ws_col++;
+    foreach my $attr (@attrs) {
+        my $value;
+        if ($attr =~ /(.*)->ISO$/ and $Ticket->$1->Unix <= 0) {
+            $value = '';
+        } else {
+            my $method = '$Ticket->'.$attr.'()';
+            $method =~ s/->ISO\(\)$/->ISO( Timezone => 'user' )/;
+            $value = eval $method;
+            if ($@) {die "Failed to find $attr - ". $@}; 
+        }
+        push @row, $value;
     }
-    foreach my $id (sort keys %known_cfs) {
-        my $val = $row->{'CustomField-'.$id};
-        $worksheet->write($ws_row, $ws_col, $val);
+
+    my $values = $Ticket->CustomFieldValues;
+    $values->OrderByCols; # don't sort them
+    while (my $value = $values->Next) {
+        my $pos = $cf_name_to_pos{ $cf_id_to_name{ $value->CustomField } };
+        next unless $pos;
+
+        $row[$pos] = '' unless defined $row[$pos];
+        $row[$pos] .= ', ' if $row[$pos];
+        $row[$pos] .= $value->Content;
+    }
+
+    my $ws_col = 0;
+    foreach my $ws_val ( @row ) {
+        $worksheet->write($ws_row, $ws_col, $ws_val);
         $ws_col++;
     }
     $ws_row++;
+
+    unless (++$i%10) {
+        $i = 0;
+        $m->flush_buffer;
+    }
 }
 
 $workbook->close;
