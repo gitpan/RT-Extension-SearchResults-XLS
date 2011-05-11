@@ -6,6 +6,6 @@ author('Emmanuel Lacour <elacour@home-dn.net>');
 version_from('lib/RT/Extension/SearchResults/XLS.pm');
 abstract_from('lib/RT/Extension/SearchResults/XLS.pm');
 requires('Spreadsheet::WriteExcel');
+repository 'git://git.home-dn.net/manu/RT-Extension-SearchResults-XLS.git';
 
 &WriteAll;
-

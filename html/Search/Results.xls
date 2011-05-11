@@ -119,7 +119,7 @@ $r->content_type('application/vnd.ms-excel');
     }
     my $ws_col = 0;
     foreach my $ws_val ( @header ) {
-        $worksheet->write(0, $ws_col, $ws_val);
+        $worksheet->write_string(0, $ws_col, $ws_val);
         $ws_col++;
     }
 }
@@ -154,7 +154,7 @@ while ( my $Ticket = $Tickets->Next()) {
 
     my $ws_col = 0;
     foreach my $ws_val ( @row ) {
-        $worksheet->write($ws_row, $ws_col, $ws_val);
+        $worksheet->write_string($ws_row, $ws_col, $ws_val);
         $ws_col++;
     }
     $ws_row++;
