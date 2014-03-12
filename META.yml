@@ -24,4 +24,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://git.home-dn.net/manu/RT-Extension-SearchResults-XLS.git
-version: 0.07
+version: 0.08

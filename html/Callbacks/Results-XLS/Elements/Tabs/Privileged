@@ -55,12 +55,29 @@ my $query_string = sub {
     return $u->query;
 };
 
-if ( $request_path =~ qr{^/Search/Results\.html} ) {
-    my $tabs = PageMenu;
-    $tabs->child(
-        'xls' => title => loc('XLS'),
-        path => '/Search/Results.xls?' . $query_string->( %{ $m->request_args } )
-    );
+
+if (            
+     (           
+            $request_path =~ m{^/Search/}
+         && $request_path !~ m{^/Search/Simple\.html}
+     )       
+     || (   $request_path =~ m{^/Search/Simple\.html}
+         && $DECODED_ARGS->{'q'} )
+   ) {
+    
+    my $has_query = '';
+    my $current_search = $session{"CurrentSearchHash"} || {};
+    $has_query = 1 if ( $DECODED_ARGS->{'Query'} or $current_search->{'Query'} );
+
+    if ( $has_query ) {
+        my $tabs = PageMenu;
+        my $feeds = $tabs->child('more'); 
+        
+        $feeds->child(
+            'xls' => title => loc('XLS'),
+            path => '/Search/Results.xls?' . $query_string->( %{ $m->request_args } )
+        );
+    }
 }
 
 </%INIT>
